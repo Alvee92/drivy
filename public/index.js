@@ -32,11 +32,26 @@ function Price(rent,car)
 		}
 		var RDate = new Date(rent[i].returnDate);
 		var PDate = new Date(rent[i].pickupDate);
-		console.log();
-		rent[i].price = (diffdate(PDate,RDate)+1)*PriceCarDay + rent[i].distance * PriceCarKm;
+		
+		var percent; // compute of the percentage
+		
+			if (diffdate(PDate,RDate)+1<4)
+			percent=0.9;
+ 			
+			if (diffdate(PDate,RDate)+1<10)
+			percent = 0.7;
+			 
+			if(diffdate(PDate,RDate)+1>10)
+			percent = 0.5;
+			 
+			
+
+		rent[i].price = ((diffdate(PDate,RDate)+1)*PriceCarDay* percent + rent[i].distance * PriceCarKm) ;
 		
 	}
 }
+
+
 var cars = [{
   'id': 'p306',
   'vehicule': 'peugeot 306',
