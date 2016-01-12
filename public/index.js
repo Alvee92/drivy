@@ -17,6 +17,7 @@ function Price(rent,car)
 	var PriceCarDay;
 	var PriceCarKm;
 	var price;
+	var deductibleoption = 0;
 	
 	for(i= 0; i<rent.length; i++)
 	{
@@ -27,15 +28,16 @@ function Price(rent,car)
 			{
 				PriceCarDay = car[j].pricePerDay;
 				PriceCarKm = car[j].pricePerKm;
-				if(rent[i].options.deductibleReduction){
-				PriceCarDay += 4; //if the user subscribed
-				}
-				console.log(PriceCarDay);
+				
+				
 			}
 		}
 		var RDate = new Date(rent[i].returnDate);
 		var PDate = new Date(rent[i].pickupDate);
 		
+		if(rent[i].options.deductibleReduction){
+				deductibleoption =  4 *diffdate(PDate,RDate)+1; //if the user subscribed
+				}
 		var percent; // compute of the percentage
 		
 			if (diffdate(PDate,RDate)+1<4)
