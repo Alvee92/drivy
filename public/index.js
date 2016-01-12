@@ -44,9 +44,13 @@ function Price(rent,car)
 			if(diffdate(PDate,RDate)+1>10)
 			percent = 0.5;
 			 
-			
-
 		rent[i].price = ((diffdate(PDate,RDate)+1)*PriceCarDay* percent + rent[i].distance * PriceCarKm) ;
+		
+		var valuecommission = rent[i].price * 0.3;
+		var commission = rent[i].commission;
+		commission.insurance = valuecommission *0.5;
+		commission.assistance = (diffdate(PDate,RDate)+1);
+		commission.drivy = valuecommission -commission.insurance - commission.assistance;
 		
 	}
 }
