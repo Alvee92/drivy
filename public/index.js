@@ -3,6 +3,13 @@
 //list of cars
 //useful for ALL exercises
 var price;
+function diffdate(d1,d2){
+var div=1000*60*60*24;
+
+ 
+var Diff = d2.getTime() - d1.getTime();
+return Math.ceil((Diff/div))
+}
 function Price(rent,car)
 {
 	var i ;
@@ -23,9 +30,10 @@ function Price(rent,car)
 				
 			}
 		}
-		var RDate = new Date(rent.returnDate);
-		var PDate = new Date(rent.pickupDate);
-		rent[i].price = /*(RDate-PDate)* */PriceCarDay + rent[i].distance * PriceCarKm;
+		var RDate = new Date(rent[i].returnDate);
+		var PDate = new Date(rent[i].pickupDate);
+		console.log();
+		rent[i].price = (diffdate(PDate,RDate)+1)*PriceCarDay + rent[i].distance * PriceCarKm;
 		
 	}
 }
