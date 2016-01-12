@@ -27,7 +27,10 @@ function Price(rent,car)
 			{
 				PriceCarDay = car[j].pricePerDay;
 				PriceCarKm = car[j].pricePerKm;
-				
+				if(rent[i].options.deductibleReduction){
+				PriceCarDay += 4; //if the user subscribed
+				}
+				console.log(PriceCarDay);
 			}
 		}
 		var RDate = new Date(rent[i].returnDate);
