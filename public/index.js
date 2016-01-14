@@ -2,61 +2,82 @@
 
 //list of cars
 //useful for ALL exercises
-var price;
 function diffdate(d1,d2){
 var div=1000*60*60*24;
 
- 
 var Diff = d2.getTime() - d1.getTime();
-return Math.ceil((Diff/div))
+
+return Math.ceil((Diff/div)) +1
 }
-function Price(rent,car)
+
+
+function GetCar(rentalCarId, cars) //This function allows to get the associated car given a rental id
 {
-	var i ;
-	var j =0;
-	var PriceCarDay;
-	var PriceCarKm;
-	var price;
-	var deductibleoption = 0;
-	
-	for(i= 0; i<rent.length; i++)
-	{
-		for(j = 0; j< car.length; j++)
+	for(var car of cars)
+	{ 
+		if (rentalCarId == car.id)
 		{
-			
-			if(rent[i].carId == car[j].id)
-			{
-				PriceCarDay = car[j].pricePerDay;
-				PriceCarKm = car[j].pricePerKm;
-				
-				
-			}
+			return car;
 		}
-		var RDate = new Date(rent[i].returnDate);
-		var PDate = new Date(rent[i].pickupDate);
+	}
+}
+
+
+function Price(rentals, actors) //Compute the price of the rental.
+{
+	
+	var PriceCarDay = 0; //Get the pricePerDay of the current car
+	var PriceCarim = 0;  //Get the pricePerim of the current car
+	
+	
+	for(var rent of rentals)
+	{
+		var car = GetCar(rent.carId, cars); //get the associated car
 		
-		if(rent[i].options.deductibleReduction){
-				deductibleoption =  4 *diffdate(PDate,RDate)+1; //if the user subscribed
-				}
-		var percent; // compute of the percentage
+		PriceCarDay = car.pricePerDay; //and the associated prices
+		PriceCarim = car.pricePerim;
 		
-			if (diffdate(PDate,RDate)+1<4)
-			percent=0.9;
- 			
-			if (diffdate(PDate,RDate)+1<10)
-			percent = 0.7;
+		var NumberDays = diffdate(new Date(rent.piciupDate),new Date(rent.returnDate)) ;
+		var deductibleoption = 4 * NumberDays * rent.options.deductibleReduction;  //compute the new price with the deductible option
+		//rent.options.deductibleReduction is a boolean (equal to 0 or 1) so we can multiply it directly by the number of days and 4
+		//to inow the value of deductible option, no need to do an if condition.
+		
+		var percent = 1; // compute of the percentage for the reduction
+		
+			if (NumberDays >1 && NumberDays <= 4)
+			percent = 0.9;
+			
+			if (NumberDays>4 && NumberDays <= 10)
+			percent=0.7;
 			 
-			if(diffdate(PDate,RDate)+1>10)
+			else if (NumberDays>10)
 			percent = 0.5;
 			 
-		rent[i].price = ((diffdate(PDate,RDate)+1)*PriceCarDay* percent + rent[i].distance * PriceCarKm) ;
+		rent.price = ((NumberDays)*PriceCarDay* percent + rent.distance * PriceCarim) ; //set the price
 		
-		var valuecommission = rent[i].price * 0.3;
-		var commission = rent[i].commission;
+		
+		var valuecommission = rent.price * 0.3;
+		var commission = rent.commission;
+		
 		commission.insurance = valuecommission *0.5;
-		commission.assistance = (diffdate(PDate,RDate)+1);
-		commission.drivy = valuecommission -commission.insurance - commission.assistance;
+		commission.assistance = NumberDays;
+		commission.drivy = valuecommission -commission.insurance - commission.assistance + deductibleoption;
 		
+		rent.price = ((NumberDays)*PriceCarDay* percent + rent.distance * PriceCarim) + deductibleoption; //adjust the price with the deductible 
+
+		
+		for (var theActor of actors)
+		{
+			if(rent.id == theActor.rentalId)
+			{
+				theActor.payment[0].amount = rent.price ; //amount for the driver
+				theActor.payment[1].amount = rent.price - valuecommission - deductibleoption; //amount for the owner
+				theActor.payment[2].amount = commission.insurance; //amount for the inssurance
+				theActor.payment[3].amount = commission.assistance; //amount for the assisstance
+				theActor.payment[4].amount = commission.drivy ; //amount for the drivy
+
+			}
+		}
 	}
 }
 
@@ -65,15 +86,15 @@ var cars = [{
   'id': 'p306',
   'vehicule': 'peugeot 306',
   'pricePerDay': 20,
-  'pricePerKm': 0.10
+  'pricePerim': 0.10
 }, {
   'id': 'rr-sport',
   'pricePerDay': 60,
-  'pricePerKm': 0.30
+  'pricePerim': 0.30
 }, {
   'id': 'p-boxster',
   'pricePerDay': 100,
-  'pricePerKm': 0.45
+  'pricePerim': 0.45
 }];
 
 //list of rentals
@@ -88,7 +109,7 @@ var rentals = [{
     'lastName': 'Bismuth'
   },
   'carId': 'p306',
-  'pickupDate': '2016-01-02',
+  'piciupDate': '2016-01-02',
   'returnDate': '2016-01-02',
   'distance': 100,
   'options': {
@@ -107,7 +128,7 @@ var rentals = [{
     'lastName': 'Solanas'
   },
   'carId': 'rr-sport',
-  'pickupDate': '2016-01-05',
+  'piciupDate': '2016-01-05',
   'returnDate': '2016-01-09',
   'distance': 300,
   'options': {
@@ -126,7 +147,7 @@ var rentals = [{
     'lastName': 'Ameziane'
   },
   'carId': 'p-boxster',
-  'pickupDate': '2015-12-01',
+  'piciupDate': '2015-12-01',
   'returnDate': '2015-12-15',
   'distance': 1000,
   'options': {
@@ -221,10 +242,10 @@ var rentalModifications = [{
   'distance': 150
 }, {
   'rentalId': '3-sa-92',
-  'pickupDate': '2015-12-05'
+  'piciupDate': '2015-12-05'
 }];
 
-Price(rentals, cars);
+Price(rentals,actors);
 console.log(cars);
 console.log(rentals);
 console.log(actors);
