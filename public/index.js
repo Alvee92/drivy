@@ -2,7 +2,7 @@
 
 //list of cars
 //useful for ALL exercises
-function diffdate(d1,d2){
+function diffdate(d1,d2){ //compute the number of days between two dates
 var div=1000*60*60*24;
 
 var Diff = d2.getTime() - d1.getTime();
@@ -11,7 +11,7 @@ return Math.ceil((Diff/div)) +1
 }
 
 
-function GetCar(rentalCarId, cars) //This function allows to get the associated car given a rental id
+function GetCar(rentalCarId, cars) //This function allows to get the associated car, given a rental id
 {
 	for(var car of cars)
 	{ 
@@ -22,7 +22,38 @@ function GetCar(rentalCarId, cars) //This function allows to get the associated 
 	}
 }
 
+function SetPercentage(NumberDays)
+{
+var percent = 1; // compute of the percentage for the reduction
+		
+			if (NumberDays >1 && NumberDays <= 4) //if the number of days is lower tha 4
+			percent = 0.9;
+			
+			if (NumberDays>4 && NumberDays <= 10) //els if it's lower than 10
+			percent=0.7;
+			 
+			else if (NumberDays>10)
+			percent = 0.5;
+			
+			return percent;
+}
 
+function SetActorAmount (rentalId, who, amount, actors) //this function is tricky becaus 'actor' is an array of objects which contents an array of objects
+{
+	for (var theActor of actors) //for each instance of the array actors
+	{
+		if (theActor.rentalId == rentalId) //when we find the correct rentalId
+		{
+			for( var actorName of theActor.payment) //we search in the payment array to find the correct actor name (owner, drivy etc.)
+				{
+					if(who == actorName.who)
+						{
+							actorName.amount = amount; //when we find it, we just set the correct amount
+						}
+				}
+		}
+	}
+}
 function Price(rentals, actors) //Compute the price of the rental.
 {
 	
@@ -40,21 +71,9 @@ function Price(rentals, actors) //Compute the price of the rental.
 		var NumberDays = diffdate(new Date(rent.piciupDate),new Date(rent.returnDate)) ;
 		var deductibleoption = 4 * NumberDays * rent.options.deductibleReduction;  //compute the new price with the deductible option
 		//rent.options.deductibleReduction is a boolean (equal to 0 or 1) so we can multiply it directly by the number of days and 4
-		//to inow the value of deductible option, no need to do an if condition.
-		
-		var percent = 1; // compute of the percentage for the reduction
-		
-			if (NumberDays >1 && NumberDays <= 4)
-			percent = 0.9;
-			
-			if (NumberDays>4 && NumberDays <= 10)
-			percent=0.7;
-			 
-			else if (NumberDays>10)
-			percent = 0.5;
-			 
-		rent.price = ((NumberDays)*PriceCarDay* percent + rent.distance * PriceCarim) ; //set the price
-		
+		//to know the value of deductible option, no need to do an if condition.
+	
+		rent.price = ((NumberDays)*PriceCarDay* SetPercentage(NumberDays) + rent.distance * PriceCarim) + deductibleoption; //set the final price with the deductible 
 		
 		var valuecommission = rent.price * 0.3;
 		var commission = rent.commission;
@@ -63,21 +82,11 @@ function Price(rentals, actors) //Compute the price of the rental.
 		commission.assistance = NumberDays;
 		commission.drivy = valuecommission -commission.insurance - commission.assistance + deductibleoption;
 		
-		rent.price = ((NumberDays)*PriceCarDay* percent + rent.distance * PriceCarim) + deductibleoption; //adjust the price with the deductible 
-
-		
-		for (var theActor of actors)
-		{
-			if(rent.id == theActor.rentalId)
-			{
-				theActor.payment[0].amount = rent.price ; //amount for the driver
-				theActor.payment[1].amount = rent.price - valuecommission - deductibleoption; //amount for the owner
-				theActor.payment[2].amount = commission.insurance; //amount for the inssurance
-				theActor.payment[3].amount = commission.assistance; //amount for the assisstance
-				theActor.payment[4].amount = commission.drivy ; //amount for the drivy
-
-			}
-		}
+		SetActorAmount(rent.id, 'driver', rent.price , actors);
+		SetActorAmount(rent.id, 'owner', rent.price - valuecommission - deductibleoption , actors);
+		SetActorAmount(rent.id, 'insurance', commission.insurance , actors);
+		SetActorAmount(rent.id, 'assistance', commission.assistance , actors);
+		SetActorAmount(rent.id, 'drivy', commission.drivy , actors);
 	}
 }
 
